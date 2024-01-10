@@ -57,12 +57,16 @@ async function main(req, res) {
 async function checkOtp(req, res) {
   const { userEmail, otpCode } = req.params;
   try {
-    const userMail = await Mail.findOne({ email: userEmail });
-    if (userMail) {
-      return userMail.otpCode;
-    } else {
-      return false;
+    const user = await Mail.findOne({ email: userEmail });
+
+    if (!user) {
+      return res.status(404).json({ message: 'user not found' });
     }
+    if (user.otpCode === otpCode) {
+      console.log('otp code is correct');
+    }
+
+    return res.status(200).json({ message: 'otp code is correct' });
   } catch (err) {
     console.error('err ', err.message);
   }
