@@ -77,10 +77,14 @@ async function checkOtp(req, res) {
     const timeDifference = currentTime - otpCreationTime; // Calculating the time difference in milliseconds
 
     if (timeDifference > 300000) {
+      // Delete the expired OTP code from the database
+      await Mail.deleteOne({ email: email });
       return res.status(404).json({ message: 'otp code expired' }); // Sending error response if OTP is expired
     }
 
     if (user.otpCode === otpCode) {
+      // Delete the OTP code after successful verification
+      await Mail.deleteOne({ email: email });
       return res.status(200).json({ message: 'otp code is correct' }); // Sending success response if OTP is correct
     } else {
       return res.status(404).json({ message: 'otp code is incorrect' }); // Sending error response if OTP is incorrect
