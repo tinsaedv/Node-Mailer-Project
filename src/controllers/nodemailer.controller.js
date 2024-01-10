@@ -53,6 +53,19 @@ async function main(req, res) {
   }
 }
 
+const autoDeleteOtpTimeout = () => {
+  setTimeout(async () => {
+    try {
+      await Mail.deleteMany({});
+      console.log('Old OTPs deleted');
+    } catch (err) {
+      console.error('Error deleting old OTPs', err.message);
+    }
+  }, 5000);
+};
+
+autoDeleteOtpTimeout();
+
 async function checkOtp(req, res) {
   const { email, otpCode } = req.body;
   try {
