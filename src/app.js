@@ -16,16 +16,25 @@ const transporter = nodemailer.createTransport({
     pass: process.env.PASSWORD,
   },
 });
+
 console.log(process.env.EMAIL);
 // async..await is not allowed in global scope, must use a wrapper
-async function main() {
+async function main(userEmail) {
+  const otpCode = Math.floor(Math.random() * 10000);
   const mailOptions = {
-    from: 'tinsaeyohannes@gmail.com', // sender address
-    to: 'binukbe4@gmail.com', // list of receivers
-    subject: 'Hello ✔', // Subject line
-    text: 'Hello world?', // plain text body
-    html: '<b>Hello world?</b>', // html body
+    from: 'no-reply@yourdomain.com', // sender address
+    to: userEmail, // receiver email
+    subject: 'Your Email Verification Code', // Subject line
+    text: `Your email verification code is: ${otpCode}`, // plain text body
+    html: `
+      <p>Hello,</p>
+      <p>Your email verification code is:</p>
+      <h3>${otpCode}</h3>
+      <p>Please enter this code to verify your email address.</p>
+      <p>If you did not request this, please ignore this email.</p>
+    `, // html body
   };
+
   // send mail with defined transport object
   const info = await transporter.sendMail(mailOptions);
   if (info) {
@@ -44,6 +53,6 @@ async function main() {
   //
 }
 
-main().catch(console.error);
+main('binukbe4@gmail.com', 'gohapo4862@tanlanav.com');
 
 module.exports = app;
