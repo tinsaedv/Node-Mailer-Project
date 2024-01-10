@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const Mail = require('../models/nodemailer.model');
 
 const transporter = nodemailer.createTransport({
   host: 'smtp-relay.brevo.com',
@@ -12,7 +13,9 @@ const transporter = nodemailer.createTransport({
 
 console.log(process.env.EMAIL);
 // async..await is not allowed in global scope, must use a wrapper
-async function main(userEmail) {
+async function main(req, res) {
+  const { userEmail } = req.params;
+
   const otpCode = Math.floor(Math.random() * 10000);
 
   const mailOptions = {
@@ -38,7 +41,31 @@ async function main(userEmail) {
   }
 
   console.log('Message sent: %s', info.messageId);
-  // Message sent: <b658f8ca-6296-ccf4-8306-87d57a0b4321@example.com>
+
+  try {
+    const userMail = await Mail.create({
+      email: userEmail,
+      otpCode: otpCode,
+    });
+
+    userMail.save();
+  } catch (err) {
+    console.error('err ', err.message);
+  }
 }
 
-module.exports = { main };
+async function checkOtp(req, res) {
+  const { userEmail, otpCode } = req.params;
+  try {
+    const userMail = await Mail.findOne({ email: userEmail });
+    if (userMail) {
+      return userMail.otpCode;
+    } else {
+      return false;
+    }
+  } catch (err) {
+    console.error('err ', err.message);
+  }
+}
+
+module.exports = { main, checkOtp };
