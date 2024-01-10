@@ -11,8 +11,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-console.log(process.env.EMAIL);
-// async..await is not allowed in global scope, must use a wrapper
 async function main(req, res) {
   const { userEmail } = req.params;
 
@@ -55,18 +53,19 @@ async function main(req, res) {
 }
 
 async function checkOtp(req, res) {
-  const { userEmail, otpCode } = req.params;
+  const { userEmail, otpCode } = req.body;
   try {
     const user = await Mail.findOne({ email: userEmail });
 
     if (!user) {
       return res.status(404).json({ message: 'user not found' });
     }
-    if (user.otpCode === otpCode) {
-      console.log('otp code is correct');
-    }
 
-    return res.status(200).json({ message: 'otp code is correct' });
+    if (user.otpCode === otpCode) {
+      return res.status(200).json({ message: 'otp code is correct' });
+    } else {
+      return res.status(404).json({ message: 'otp code is incorrect' });
+    }
   } catch (err) {
     console.error('err ', err.message);
   }
