@@ -12,13 +12,13 @@ const transporter = nodemailer.createTransport({
 });
 
 async function main(req, res) {
-  const { userEmail } = req.params;
+  const { email } = req.body;
 
   const otpCode = Math.floor(Math.random() * 10000);
 
   const mailOptions = {
     from: 'no-reply@yourdomain.com', // sender address
-    to: userEmail, // receiver email
+    to: email, // receiver email
     subject: 'Your Email Verification Code', // Subject line
     text: `Your email verification code is: ${otpCode}`, // plain text body
     html: `
@@ -42,20 +42,21 @@ async function main(req, res) {
 
   try {
     const userMail = await Mail.create({
-      email: userEmail,
+      email: email,
       otpCode: otpCode,
     });
 
     userMail.save();
+    res.status(200).json({ message: 'otp code sent' });
   } catch (err) {
     console.error('err ', err.message);
   }
 }
 
 async function checkOtp(req, res) {
-  const { userEmail, otpCode } = req.body;
+  const { email, otpCode } = req.body;
   try {
-    const user = await Mail.findOne({ email: userEmail });
+    const user = await Mail.findOne({ email: email });
 
     if (!user) {
       return res.status(404).json({ message: 'user not found' });
