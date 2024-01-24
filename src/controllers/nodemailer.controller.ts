@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 });
 
 async function main(req: Request, res: Response): Promise<void> {
-  const { email } = req.body;
+  const { email }: { email: string } = req.body;
 
   const otpCode: number = Math.floor(Math.random() * 10000);
 
@@ -49,13 +49,13 @@ async function main(req: Request, res: Response): Promise<void> {
     userMail.save();
     res.status(200).json({ message: 'otp code sent' });
   } catch (err) {
-    console.error('err ', err.message);
+    console.error('err ', (err as Error).message);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
 
 async function checkOtp(req: Request, res: Response) {
-  const { email, otpCode } = req.body;
+  const { email, otpCode }: { email: string; otpCode: string } = req.body;
   try {
     const user = await Mail.findOne({ email: email });
 
@@ -73,16 +73,18 @@ async function checkOtp(req: Request, res: Response) {
     }
 
     if (user.otpCode === otpCode) {
-      res.status(200).json({ message: 'otp code is correct' });
+      user.verified = true;
       setTimeout(async () => {
         return await Mail.deleteOne({ email: email });
       }, 5000);
+      await user.save();
+      return res.status(200).json({ message: 'OTP code is Correct' });
     } else {
-      return res.status(404).json({ message: 'otp code is incorrect' });
+      return res.status(404).json({ message: 'OTP code is Incorrect' });
     }
   } catch (err) {
-    console.error('err ', err.message);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('err ', (err as Error).message);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
 
