@@ -1,5 +1,6 @@
-import * as http from 'http';
 import * as dotenv from 'dotenv';
+dotenv.config();
+import * as http from 'http';
 import app from './app';
 import mongoConnect from './utils/mongo';
 
